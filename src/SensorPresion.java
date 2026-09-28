@@ -1,10 +1,5 @@
-/**
- * Sensor de presion atmosferica.
- * Autores: [Completar nombres del equipo]
- */
-public class SensorPresion extends Sensor {
-    public SensorPresion(String codigo, String marca, String modelo,
-                         EstacionMeteorologica estacion) {
+public class SensorPresion extends Sensor{
+    public SensorPresion(String codigo, String marca, String modelo, EstacionMeteorologica estacion) {
         super(codigo, marca, modelo, estacion);
     }
 
@@ -18,3 +13,4 @@ public class SensorPresion extends Sensor {
         return valor >= 800.0f && valor <= 1100.0f;
     }
 }
+

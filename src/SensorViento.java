@@ -1,10 +1,6 @@
-/**
- * Sensor de velocidad del viento.
- * Autores: [Completar nombres del equipo]
- */
-public class SensorViento extends Sensor {
-    public SensorViento(String codigo, String marca, String modelo,
-                        EstacionMeteorologica estacion) {
+public class SensorViento extends Sensor{
+
+    public SensorViento(String codigo, String marca, String modelo, EstacionMeteorologica estacion) {
         super(codigo, marca, modelo, estacion);
     }
 

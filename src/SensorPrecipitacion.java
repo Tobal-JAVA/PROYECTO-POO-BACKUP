@@ -1,10 +1,6 @@
-/**
- * Sensor de precipitacion acumulada.
- * Autores: [Completar nombres del equipo]
- */
 public class SensorPrecipitacion extends Sensor {
-    public SensorPrecipitacion(String codigo, String marca, String modelo,
-                               EstacionMeteorologica estacion) {
+
+    public SensorPrecipitacion(String codigo, String marca, String modelo, EstacionMeteorologica estacion) {
         super(codigo, marca, modelo, estacion);
     }
 
@@ -18,3 +14,4 @@ public class SensorPrecipitacion extends Sensor {
         return valor >= 0.0f && valor <= 500.0f;
     }
 }
+

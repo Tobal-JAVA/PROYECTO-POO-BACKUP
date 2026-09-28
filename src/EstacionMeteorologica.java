@@ -1,131 +1,287 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
-/**
- * Estacion meteorologica que administra sensores y sus mediciones.
- * Autores: [Completar nombres del equipo]
- */
 public class EstacionMeteorologica {
-    private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter HORA = DateTimeFormatter.ofPattern("HH:mm");
 
-    private final String codigo;
-    private final String nombre;
-    private final float longitud;
-    private final float latitud;
-    private final float altitud;
+    private String codigo;
+    private String nombre;
+    private float longitud;
+    private float latitud;
+    private float altitud;
     private Estado estado;
-    private final Comuna comuna;
-    private final List<Sensor> sensores;
+    private Comuna comuna;
+    private ArrayList<Sensor> sensores;
 
-    public EstacionMeteorologica(String codigo, String nombre, float longitud,
-                                 float latitud, float altitud, Comuna comuna) {
+    public EstacionMeteorologica(String codigo, String nombre,
+                                 float longitud, float latitud, float altitud, Comuna comuna) {
+
         this.codigo = codigo;
         this.nombre = nombre;
         this.longitud = longitud;
         this.latitud = latitud;
         this.altitud = altitud;
-        this.comuna = comuna;
         this.estado = Estado.ACTIVO;
+        this.comuna = comuna;
         this.sensores = new ArrayList<>();
     }
 
-    public boolean instalaSensor(String codigo, String marca, String modelo, TipoSensor tipo) {
-        if (estado != Estado.ACTIVO || buscarSensor(codigo) != null
-                || existeSensorActivoDelTipo(tipo)) {
-            return false;
-        }
-        Sensor sensor = crearSensor(codigo, marca, modelo, tipo);
-        return sensores.add(sensor);
+    String getCodigo() {
+        return codigo;
     }
 
-    public boolean registraMedicion(LocalDateTime fechaHora, float valor,
-                                    String codigoSensor) {
-        if (estado != Estado.ACTIVO) {
+    Estado getEstado() {
+        return estado;
+    }
+
+    public boolean instalaSensor(String codigo, String marca,
+                                 String modelo, TipoSensor tipo) {
+
+        if (this.estado != Estado.ACTIVO) {
             return false;
         }
-        Sensor sensor = buscarSensor(codigoSensor);
-        return sensor != null && sensor.addMedicion(fechaHora, valor);
+
+        for (Sensor s : sensores) {
+
+            if (s.getCodigo().equals(codigo)) {
+                return false;
+            }
+
+            if (s.getEstado() == Estado.ACTIVO
+                    && sensorCoincideConTipo(s, tipo)) {
+                return false;
+            }
+        }
+
+        Sensor nuevoSensor;
+
+        switch (tipo) {
+
+            case TEMPERATURA:
+                nuevoSensor = new SensorTemperatura(
+                        codigo, marca, modelo, this);
+                break;
+
+            case HUMEDAD:
+                nuevoSensor = new SensorHumedad(
+                        codigo, marca, modelo, this);
+                break;
+
+            case PRESION:
+                nuevoSensor = new SensorPresion(
+                        codigo, marca, modelo, this);
+                break;
+
+            case VIENTO:
+                nuevoSensor = new SensorViento(
+                        codigo, marca, modelo, this);
+                break;
+
+            case PRECIPITACION:
+                nuevoSensor = new SensorPrecipitacion(
+                        codigo, marca, modelo, this);
+                break;
+
+            default:
+                return false;
+        }
+
+        sensores.add(nuevoSensor);
+        return true;
+    }
+
+    public boolean registraMedicion(LocalDateTime fechaHora,
+                                    float valor, String codigoSensor) {
+
+        if (this.estado != Estado.ACTIVO) {
+            return false;
+        }
+
+        Sensor s = findSensorByCodigo(codigoSensor);
+
+        if (s == null) {
+            return false;
+        }
+
+        return s.addMedicion(fechaHora, valor);
+    }
+
+    private int getCantidadSensoresOperativos() {
+
+        int operativos = 0;
+
+        for (Sensor s : sensores) {
+
+            if (s.getEstado() == Estado.ACTIVO) {
+                operativos++;
+            }
+        }
+
+        return operativos;
     }
 
     @Override
+
     public String toString() {
-        String ubicacion = "(" + latitud + ", " + longitud + ", " + altitud + " m)";
-        long sensoresOperativos = sensores.stream()
-                .filter(s -> s.getEstado() == Estado.ACTIVO)
-                .count();
-        return codigo + "; " + nombre + "; " + ubicacion + "; " + estado
-                + "; " + sensoresOperativos;
+
+        return String.format(Locale.US,
+                "%s; %s; (%.4f; %.4f; %.0f m); %s; %d",
+                codigo,
+                nombre,
+                latitud,
+                longitud,
+                altitud,
+                estado,
+                getCantidadSensoresOperativos());
     }
 
     public String[][] getResumenSensores() {
-        String[][] resumen = new String[sensores.size()][7];
+
+        if (sensores.isEmpty()) {
+            return new String[0][0];
+        }
+
+        String[][] matriz = new String[sensores.size()][7];
+
+        DateTimeFormatter formato =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
         for (int i = 0; i < sensores.size(); i++) {
-            Sensor sensor = sensores.get(i);
-            Medicion ultima = sensor.getLastMedicion();
-            resumen[i][0] = sensor.getCodigo();
-            resumen[i][1] = tipoConcreto(sensor);
-            resumen[i][2] = sensor.getMarca();
-            resumen[i][3] = sensor.getModelo();
-            resumen[i][4] = sensor.getUnidad();
-            resumen[i][5] = sensor.getEstado().name();
-            resumen[i][6] = ultima == null ? "Sin mediciones"
-                    : ultima.toString() + " " + sensor.getUnidad();
+
+            Sensor s = sensores.get(i);
+
+            matriz[i][0] = s.getCodigo();
+            matriz[i][1] = obtenerTipoConcreto(s);
+            matriz[i][2] = s.getMarca();
+            matriz[i][3] = s.getModelo();
+            matriz[i][4] = s.getUnidad();
+            matriz[i][5] = s.getEstado().toString();
+
+            Medicion ultima = s.getLastMedicion();
+
+            if (ultima != null) {
+
+                matriz[i][6] = String.format(Locale.US,
+                        "%s %.1f %s",
+                        ultima.getFechaHora().format(formato),
+                        ultima.getValor(),
+                        s.getUnidad());
+
+            } else {
+
+                matriz[i][6] = "sin mediciones";
+            }
         }
-        return resumen;
+
+        return matriz;
     }
 
-    public String[][] getMedicionesSensorBetween(String codigoSensor,
-                                                  LocalDateTime inicio,
-                                                  LocalDateTime fin) {
-        Sensor sensor = buscarSensor(codigoSensor);
-        if (sensor == null || inicio.isAfter(fin)) {
-            return new String[0][4];
+    public String[][] getMedicionesSensorBetween(
+            String codigoSensor,
+            LocalDateTime inicio,
+            LocalDateTime fin) {
+
+        Sensor s = findSensorByCodigo(codigoSensor);
+
+        if (s == null) {
+            return new String[0][0];
         }
-        Medicion[] encontradas = sensor.getMedicionesBetween(inicio, fin);
-        String[][] resultado = new String[encontradas.length][4];
-        for (int i = 0; i < encontradas.length; i++) {
-            resultado[i][0] = encontradas[i].getFechaHora().format(FECHA);
-            resultado[i][1] = encontradas[i].getFechaHora().format(HORA);
-            resultado[i][2] = String.format(Locale.US, "%.1f", encontradas[i].getValor());
-            resultado[i][3] = sensor.getUnidad();
+
+        Medicion[] mediciones =
+                s.getMedicionesBetween(inicio, fin);
+
+        if (mediciones == null || mediciones.length == 0) {
+            return new String[0][0];
         }
-        return resultado;
+
+        String[][] matriz = new String[mediciones.length][4];
+
+        DateTimeFormatter formatoFecha =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        DateTimeFormatter formatoHora =
+                DateTimeFormatter.ofPattern("HH:mm");
+
+        for (int i = 0; i < mediciones.length; i++) {
+
+            Medicion m = mediciones[i];
+
+            matriz[i][0] =
+                    m.getFechaHora().format(formatoFecha);
+
+            matriz[i][1] =
+                    m.getFechaHora().format(formatoHora);
+
+            matriz[i][2] =
+                    String.format(Locale.US, "%.1f", m.getValor());
+
+            matriz[i][3] =
+                    s.getUnidad();
+        }
+
+        return matriz;
     }
 
-    private Sensor buscarSensor(String codigoSensor) {
-        return sensores.stream()
-                .filter(s -> s.getCodigo().equalsIgnoreCase(codigoSensor))
-                .findFirst()
-                .orElse(null);
+    private Sensor findSensorByCodigo(String codigo) {
+
+        for (Sensor s : sensores) {
+
+            if (s.getCodigo().equals(codigo)) {
+                return s;
+            }
+        }
+
+        return null;
     }
 
-    private boolean existeSensorActivoDelTipo(TipoSensor tipo) {
-        return sensores.stream().anyMatch(s ->
-                s.getEstado() == Estado.ACTIVO && tipoConcreto(s).equals(tipo.name()));
-    }
+    private boolean sensorCoincideConTipo(
+            Sensor s, TipoSensor tipo) {
 
-    private Sensor crearSensor(String codigo, String marca, String modelo, TipoSensor tipo) {
         switch (tipo) {
-            case HUMEDAD:
-                return new SensorHumedad(codigo, marca, modelo, this);
+
             case TEMPERATURA:
-                return new SensorTemperatura(codigo, marca, modelo, this);
+                return s instanceof SensorTemperatura;
+
+            case HUMEDAD:
+                return s instanceof SensorHumedad;
+
             case PRESION:
-                return new SensorPresion(codigo, marca, modelo, this);
+                return s instanceof SensorPresion;
+
             case VIENTO:
-                return new SensorViento(codigo, marca, modelo, this);
+                return s instanceof SensorViento;
+
             case PRECIPITACION:
-                return new SensorPrecipitacion(codigo, marca, modelo, this);
+                return s instanceof SensorPrecipitacion;
+
             default:
-                throw new IllegalArgumentException("Tipo de sensor no soportado");
+                return false;
         }
     }
 
-    private String tipoConcreto(Sensor sensor) {
-        return sensor.getClass().getSimpleName().replace("Sensor", "").toUpperCase();
+    private String obtenerTipoConcreto(Sensor s) {
+
+        if (s instanceof SensorTemperatura) {
+            return "TEMPERATURA";
+        }
+
+        if (s instanceof SensorHumedad) {
+            return "HUMEDAD";
+        }
+
+        if (s instanceof SensorPresion) {
+            return "PRESIÓN";
+        }
+
+        if (s instanceof SensorViento) {
+            return "VIENTO";
+        }
+
+        if (s instanceof SensorPrecipitacion) {
+            return "PRECIPITACIÓN";
+        }
+
+        return "DESCONOCIDO";
     }
 }

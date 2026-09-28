@@ -1,225 +1,177 @@
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class InstitutoMeteorologia {
 
-    private ArrayList<Region> listaRegiones;
-    private ArrayList<EstacionMeteorologica> listaEstaciones;
-
-    public InstitutoMeteorologia() {
-        this.listaRegiones = new ArrayList<>();
-        this.listaEstaciones = new ArrayList<>();
-    }
-
-    private Region buscarRegion(int codigoRegion) {
-        for (Region regionActual : this.listaRegiones) {
-            if (regionActual.getCodigo() == codigoRegion) {
-                return regionActual;
-            }
-        }
-        return null;
-    }
-
-    private EstacionMeteorologica buscarEstacion(String codigoEstacion) {
-        for (EstacionMeteorologica estacionActual : this.listaEstaciones) {
-            if (estacionActual.getCodigo().equalsIgnoreCase(codigoEstacion)) {
-                return estacionActual;
-            }
-        }
-        return null;
-    }
+    private List<Region> regiones = new ArrayList<>();
+    private List<EstacionMeteorologica> estaciones = new ArrayList<>();
 
     public boolean creaRegion(int codigo, String nombre) {
-        for (Region regionActual : this.listaRegiones) {
-            if (regionActual.getCodigo() == codigo) {
-                return false;
-            }
-            if (regionActual.getNombre().equalsIgnoreCase(nombre)) {
-                return false;
-            }
-        }
-
-        Region nuevaRegion = new Region(codigo, nombre);
-        return this.listaRegiones.add(nuevaRegion);
-    }
-
-    public boolean creaComuna(int codigo, String nombre, int codigoRegion) {
-        Region regionEncontrada = buscarRegion(codigoRegion);
-
-        if (regionEncontrada != null) {
-            return regionEncontrada.addComuna(codigo, nombre);
-        }
-
-        return false;
-    }
-
-    public boolean creaEstacion(String codigo, String nombre, float longitud,
-                                float latitud, float altitud, int codigoRegion,
-                                int codigoComuna) {
-
-        Region regionEncontrada = buscarRegion(codigoRegion);
-        if (regionEncontrada == null) {
+        if (existeRegion(codigo, nombre)) {
             return false;
         }
-
-        Comuna comunaEncontrada = regionEncontrada.findComunaById(codigoComuna);
-        if (comunaEncontrada == null) {
-            return false;
-        }
-
-        EstacionMeteorologica estacionExistente = buscarEstacion(codigo);
-        if (estacionExistente != null) {
-            return false;
-        }
-
-        EstacionMeteorologica nuevaEstacion = new EstacionMeteorologica(
-                codigo, nombre, longitud, latitud, altitud, comunaEncontrada);
-
-        comunaEncontrada.addEstacion(nuevaEstacion);
-        this.listaEstaciones.add(nuevaEstacion);
+        regiones.add(new Region(codigo, nombre));
         return true;
     }
 
-    public boolean instalaSensor(String codigo, String marca, String modelo,
-                                 TipoSensor tipo, String codigoEstacion) {
-
-        EstacionMeteorologica estacionEncontrada = buscarEstacion(codigoEstacion);
-        if (estacionEncontrada != null) {
-            return estacionEncontrada.instalaSensor(codigo, marca, modelo, tipo);
+    public boolean creaComuna(int codigo, String nombre, int codigoRegion) {
+        Region region = buscarRegionPorId(codigoRegion);
+        if (region == null) {
+            return false;
         }
-
-        return false;
+        return region.addComuna(codigo, nombre);
     }
 
-    public boolean registraMedicion(LocalDateTime fechaHora, float valor,
-                                    String codigoEstacion, String codigoSensor) {
-
-        EstacionMeteorologica estacionEncontrada = buscarEstacion(codigoEstacion);
-        if (estacionEncontrada != null) {
-            return estacionEncontrada.registraMedicion(codigoSensor, fechaHora, valor);
+    public boolean creaEstacion(String cod, String nombre, float lon, float lat, float alt, int codRegion, int codComuna) {
+        Region region = buscarRegionPorId(codRegion);
+        if (region == null) {
+            return false;
+        }
+        Comuna comuna = region.findComunaById(codComuna);
+        if (comuna == null) {
+            return false;
+        }
+        if (existeEstacion(cod)) {
+            return false;
         }
 
-        return false;
+        EstacionMeteorologica estacion = new EstacionMeteorologica(cod, nombre, lon, lat, alt, comuna);
+        estaciones.add(estacion);
+        comuna.addEstacion(estacion);
+        return true;
+    }
+
+    public boolean instalaSensor(String cod, String marca, String modelo, TipoSensor tipo, String codigoEstacion) {
+        EstacionMeteorologica estacion = buscarEstacionPorId(codigoEstacion);
+        if (estacion == null) {
+            return false;
+        }
+        return estacion.instalaSensor(cod, marca, modelo, tipo);
+    }
+
+    public boolean registraMedicion(LocalDateTime fechaHora, float valor, String codEstacion, String codSensor) {
+        EstacionMeteorologica estacion = buscarEstacionPorId(codEstacion);
+        if (estacion == null) {
+            return false;
+        }
+        return estacion.registraMedicion(codSensor, fechaHora, valor);
     }
 
     public String[][] listaRegiones() {
-        int tamañoRegiones = this.listaRegiones.size();
-        if (tamañoRegiones == 0) {
-            return new String[0][4];
+        if (regiones.isEmpty()) {
+            return new String[0][0];
         }
-
-        String[][] matrizRegiones = new String[tamañoRegiones][4];
-
-        for (int i = 0; i < tamañoRegiones; i++) {
-            Region regionActual = this.listaRegiones.get(i);
-
-            matrizRegiones[i][0] = String.valueOf(regionActual.getCodigo());
-            matrizRegiones[i][1] = regionActual.getNombre();
-            matrizRegiones[i][2] = String.valueOf(regionActual.getComunas().length);
-            matrizRegiones[i][3] = String.valueOf(regionActual.getCantidadEstaciones());
+        String[][] resultado = new String[regiones.size()][4];
+        for (int i = 0; i < regiones.size(); i++) {
+            Region r = regiones.get(i);
+            resultado[i][0] = String.valueOf(r.getCodigo());
+            resultado[i][1] = r.getNombre();
+            resultado[i][2] = String.valueOf(r.getComunas().length);
+            resultado[i][3] = String.valueOf(r.getCantidadEstaciones());
         }
-
-        return matrizRegiones;
+        return resultado;
     }
 
     public String[][] listaComunas() {
-        ArrayList<String[]> listaTemporal = new ArrayList<>();
-
-        for (Region regionActual : this.listaRegiones) {
-            Comuna[] arregloComunas = regionActual.getComunas();
-
-            for (Comuna comunaActual : arregloComunas) {
-                String[] filaComuna = new String[5];
-                filaComuna[0] = String.valueOf(comunaActual.getCodigo());
-                filaComuna[1] = comunaActual.getNombre();
-                filaComuna[2] = regionActual.getNombre();
-                filaComuna[3] = String.valueOf(comunaActual.getCantidadEstaciones());
-                filaComuna[4] = String.valueOf(comunaActual.getCantidadEstacionesActivas());
-
-                listaTemporal.add(filaComuna);
+        List<Comuna> todas = new ArrayList<>();
+        for (Region r : regiones) {
+            for (Comuna c : r.getComunas()) {
+                todas.add(c);
             }
         }
-
-        int tamañoComunas = listaTemporal.size();
-        if (tamañoComunas == 0) {
-            return new String[0][5];
+        if (todas.isEmpty()) {
+            return new String[0][0];
         }
 
-        String[][] resultadoMatriz = new String[tamañoComunas][5];
-        for (int i = 0; i < tamañoComunas; i++) {
-            resultadoMatriz[i] = listaTemporal.get(i);
+        String[][] resultado = new String[todas.size()][5];
+        for (int i = 0; i < todas.size(); i++) {
+            Comuna c = todas.get(i);
+            resultado[i][0] = String.valueOf(c.getCodigo());
+            resultado[i][1] = c.getNombre();
+            resultado[i][2] = c.getRegion().getNombre();
+            resultado[i][3] = String.valueOf(c.getCantidadEstaciones());
+            resultado[i][4] = String.valueOf(c.getCantidadEstacionesActivas());
         }
-
-        return resultadoMatriz;
+        return resultado;
     }
 
     public String[][] listaEstaciones(int codigoRegion, int codigoComuna) {
-        Region regionEncontrada = buscarRegion(codigoRegion);
-        if (regionEncontrada == null) {
-            return new String[0][5];
+        Region region = buscarRegionPorId(codigoRegion);
+        if (region == null) {
+            return new String[0][0];
+        }
+        Comuna comuna = region.findComunaById(codigoComuna);
+        if (comuna == null) {
+            return new String[0][0];
         }
 
-        Comuna comunaEncontrada = regionEncontrada.findComunaById(codigoComuna);
-        if (comunaEncontrada == null) {
-            return new String[0][5];
-        }
-
-        ArrayList<String[]> listaTemporal = new ArrayList<>();
-
-        for (EstacionMeteorologica estacionActual : this.listaEstaciones) {
-
-            EstacionMeteorologica estacionDeComuna = comunaEncontrada.findEstacionById(estacionActual.getCodigo());
-
-            if (estacionDeComuna == estacionActual) {
-                String[] base = estacionActual.toString().split(";", -1);
-
-                String[] filaEstacion = new String[5];
-                if (base.length >= 5) {
-                    filaEstacion[0] = base[0].trim();
-                    filaEstacion[1] = base[1].trim();
-                    filaEstacion[2] = base[2].trim();
-                    filaEstacion[3] = base[3].trim();
-                    filaEstacion[4] = base[4].trim();
-                } else {
-                    filaEstacion[0] = estacionActual.getCodigo();
-                    filaEstacion[1] = estacionActual.getNombre();
-                    filaEstacion[2] = "(" + estacionActual.getLatitud() + "; " + estacionActual.getLongitud() + "; " + (int)estacionActual.getAltitud() + " m)";
-                    filaEstacion[3] = String.valueOf(estacionActual.getEstado());
-                    filaEstacion[4] = String.valueOf(estacionActual.getCantidadSensoresOperativos());
-                }
-
-                listaTemporal.add(filaEstacion);
+        List<EstacionMeteorologica> filtradas = new ArrayList<>();
+        for (EstacionMeteorologica e : estaciones) {
+            if (comuna.findEstacionById(obtenerCodigoEstacion(e)) != null) {
+                filtradas.add(e);
             }
         }
 
-        int tamañoEstaciones = listaTemporal.size();
-        if (tamañoEstaciones == 0) {
-            return new String[0][5];
+        if (filtradas.isEmpty()) {
+            return new String[0][0];
         }
 
-        String[][] resultadoMatriz = new String[tamañoEstaciones][5];
-        for (int i = 0; i < tamañoEstaciones; i++) {
-            resultadoMatriz[i] = listaTemporal.get(i);
+        String[][] resultado = new String[filtradas.size()][5];
+        for (int i = 0; i < filtradas.size(); i++) {
+            resultado[i] = filtradas.get(i).toString().split("; ");
         }
-
-        return resultadoMatriz;
+        return resultado;
     }
 
     public String[][] listaSensores(String codigoEstacion) {
-        EstacionMeteorologica estacionEncontrada = buscarEstacion(codigoEstacion);
-        if (estacionEncontrada == null) {
-            return new String[0][7];
+        EstacionMeteorologica estacion = buscarEstacionPorId(codigoEstacion);
+        if (estacion == null) {
+            return new String[0][0];
         }
-
-        return estacionEncontrada.getResumenSensores();
+        return estacion.getResumenSensores();
     }
 
-    public String[][] listaMediciones(String codigoEstacion, String codigoSensor, LocalDateTime inicio, LocalDateTime fin) {
-        EstacionMeteorologica estacionEncontrada = buscarEstacion(codigoEstacion);
-        if (estacionEncontrada == null) {
-            return new String[0][4];
+    public String[][] listaMediciones(String codEstacion, String codSensor, LocalDateTime inicio, LocalDateTime fin) {
+        EstacionMeteorologica estacion = buscarEstacionPorId(codEstacion);
+        if (estacion == null) {
+            return new String[0][0];
         }
+        return estacion.getMedicionesSensorBetween(codSensor, inicio, fin);
+    }
 
-        return estacionEncontrada.getMedicionesSensorBetween(codigoSensor, inicio, fin);
+    private boolean existeRegion(int codigo, String nombre) {
+        for (Region r : regiones) {
+            if (r.getCodigo() == codigo || r.getNombre().equalsIgnoreCase(nombre)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Region buscarRegionPorId(int codigo) {
+        for (Region r : regiones) {
+            if (r.getCodigo() == codigo) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    private boolean existeEstacion(String codigo) {
+        return buscarEstacionPorId(codigo) != null;
+    }
+
+    private EstacionMeteorologica buscarEstacionPorId(String codigo) {
+        for (EstacionMeteorologica e : estaciones) {
+            if (obtenerCodigoEstacion(e).equalsIgnoreCase(codigo)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    private String obtenerCodigoEstacion(EstacionMeteorologica estacion) {
+        return estacion.toString().split("; ")[0];
     }
 }

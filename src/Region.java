@@ -1,18 +1,13 @@
 import java.util.ArrayList;
-import java.util.List;
 
-/**
- * Region administrativa que contiene comunas.
- * Autores: [Completar nombres del equipo]
- */
 public class Region {
-    private final int codigo;
-    private final String nombre;
-    private final List<Comuna> comunas;
+    private int codigo;
+    private String nombre;
+    private ArrayList<Comuna> comunas;
 
-    public Region(int codigo, String nombre) {
-        this.codigo = codigo;
-        this.nombre = nombre;
+    public Region(int cod, String nom) {
+        this.codigo = cod;
+        this.nombre = nom;
         this.comunas = new ArrayList<>();
     }
 
@@ -24,27 +19,33 @@ public class Region {
         return nombre;
     }
 
-    public boolean addComuna(int codigo, String nombre) {
-        boolean existe = comunas.stream().anyMatch(c ->
-                c.getCodigo() == codigo || c.getNombre().equalsIgnoreCase(nombre));
-        if (existe) {
-            return false;
+    public boolean addComuna(int cod, String nom) {
+        for (Comuna c : comunas) {
+            if (c.getCodigo() == cod || c.getNombre().equalsIgnoreCase(nom)) {
+                return false;
+            }
         }
-        return comunas.add(new Comuna(codigo, nombre, this));
+        Comuna nuevaComuna = new Comuna(cod, nom, this);
+        comunas.add(nuevaComuna);
+        return true;
     }
-
     public Comuna findComunaById(int codigo) {
-        return comunas.stream()
-                .filter(c -> c.getCodigo() == codigo)
-                .findFirst()
-                .orElse(null);
+        for (Comuna c : comunas) {
+            if (c.getCodigo() == codigo) {
+                return c;
+            }
+        }
+        return null;
     }
-
     public Comuna[] getComunas() {
         return comunas.toArray(new Comuna[0]);
     }
 
     public int getCantidadEstaciones() {
-        return comunas.stream().mapToInt(Comuna::getCantidadEstaciones).sum();
+        int total = 0;
+        for (Comuna c : comunas) {
+            total += c.getCantidadEstaciones();
+        }
+        return total;
     }
 }
