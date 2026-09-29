@@ -30,7 +30,8 @@ public class InterfazUsuario {
             System.out.println("5. Registrar medición");
             System.out.println("6. Generar listados");
             System.out.println("7. Salir");
-            opcion = leerOpcion("Opción: ", 1, 7);
+            System.out.print("Opción: ");
+            opcion = leerOpcion(1, 7);
             switch (opcion) {
                 case 1:
                     crearRegion();
@@ -61,8 +62,10 @@ public class InterfazUsuario {
         System.out.println();
         System.out.println("CREAR REGIÓN");
         System.out.println("------------");
-        int codigo = leerEntero("Código de región: ");
-        String nombre = leerTexto("Nombre: ");
+        System.out.print("Código de región: ");
+        int codigo = Integer.parseInt(sc.nextLine().trim());
+        System.out.print("Nombre: ");
+        String nombre = sc.nextLine().trim();
         boolean exito = instituto.creaRegion(codigo, nombre);
         if (exito) {
             System.out.println("> Región creada correctamente.");
@@ -75,9 +78,12 @@ public class InterfazUsuario {
         System.out.println();
         System.out.println("CREAR COMUNA");
         System.out.println("------------");
-        int codigoRegion = leerEntero("Código de región: ");
-        int codigo = leerEntero("Código de comuna: ");
-        String nombre = leerTexto("Nombre: ");
+        System.out.print("Código de región: ");
+        int codigoRegion = Integer.parseInt(sc.nextLine().trim());
+        System.out.print("Código de comuna: ");
+        int codigo = Integer.parseInt(sc.nextLine().trim());
+        System.out.print("Nombre: ");
+        String nombre = sc.nextLine().trim();
         boolean exito = instituto.creaComuna(codigo, nombre, codigoRegion);
         if (exito) {
             System.out.println("> Comuna creada correctamente.");
@@ -90,13 +96,20 @@ public class InterfazUsuario {
         System.out.println();
         System.out.println("CREAR ESTACIÓN METEOROLÓGICA");
         System.out.println("-----------------------------");
-        String codigo = leerTexto("Código de estación: ");
-        String nombre = leerTexto("Nombre: ");
-        float longitud = leerDecimal("Longitud: ");
-        float latitud = leerDecimal("Latitud: ");
-        float altitud = leerDecimal("Altitud (m): ");
-        int codigoRegion = leerEntero("Código de región: ");
-        int codigoComuna = leerEntero("Código de comuna: ");
+        System.out.print("Código de estación: ");
+        String codigo = sc.nextLine().trim();
+        System.out.print("Nombre: ");
+        String nombre = sc.nextLine().trim();
+        System.out.print("Longitud: ");
+        float longitud = Float.parseFloat(sc.nextLine().trim());
+        System.out.print("Latitud: ");
+        float latitud = Float.parseFloat(sc.nextLine().trim());
+        System.out.print("Altitud (m): ");
+        float altitud = Float.parseFloat(sc.nextLine().trim());
+        System.out.print("Código de región: ");
+        int codigoRegion = Integer.parseInt(sc.nextLine().trim());
+        System.out.print("Código de comuna: ");
+        int codigoComuna = Integer.parseInt(sc.nextLine().trim());
         boolean exito = instituto.creaEstacion(codigo, nombre, longitud, latitud, altitud, codigoRegion, codigoComuna);
         if (exito) {
             System.out.println("> Estación meteorológica creada correctamente.");
@@ -109,12 +122,17 @@ public class InterfazUsuario {
         System.out.println();
         System.out.println("INSTALAR SENSOR");
         System.out.println("----------------");
-        String codigoEstacion = leerTexto("Código de estación: ");
-        int opcionTipo = leerOpcion("Tipo [1 Temp.  2 Hum.  3 Presión  4 Viento  5 Precip.]: ", 1, 5);
+        System.out.print("Código de estación: ");
+        String codigoEstacion = sc.nextLine().trim();
+        System.out.print("Tipo [1 Temp.  2 Hum.  3 Presión  4 Viento  5 Precip.]: ");
+        int opcionTipo = leerOpcion(1, 5);
         TipoSensor tipo = obtenerTipoSensor(opcionTipo);
-        String codigo = leerTexto("Código de sensor: ");
-        String marca = leerTexto("Marca: ");
-        String modelo = leerTexto("Modelo: ");
+        System.out.print("Código de sensor: ");
+        String codigo = sc.nextLine().trim();
+        System.out.print("Marca: ");
+        String marca = sc.nextLine().trim();
+        System.out.print("Modelo: ");
+        String modelo = sc.nextLine().trim();
         boolean exito = instituto.instalaSensor(codigo, marca, modelo, tipo, codigoEstacion);
         if (exito) {
             System.out.println("> Sensor instalado correctamente.");
@@ -127,10 +145,15 @@ public class InterfazUsuario {
         System.out.println();
         System.out.println("REGISTRAR MEDICIÓN");
         System.out.println("-------------------");
-        String codigoEstacion = leerTexto("Código de estación: ");
-        String codigoSensor = leerTexto("Código de sensor: ");
-        LocalDateTime fechaHora = leerFechaHora("Fecha y hora [dd/MM/yyyy HH:mm]: ");
-        float valor = leerDecimal("Valor: ");
+        System.out.print("Código de estación: ");
+        String codigoEstacion = sc.nextLine().trim();
+        System.out.print("Código de sensor: ");
+        String codigoSensor = sc.nextLine().trim();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        System.out.print("Fecha y hora [dd/MM/yyyy HH:mm]: ");
+        LocalDateTime fechaHora = LocalDateTime.parse(sc.nextLine().trim(), formato);
+        System.out.print("Valor: ");
+        float valor = Float.parseFloat(sc.nextLine().trim());
         boolean exito = instituto.registraMedicion(fechaHora, valor, codigoEstacion, codigoSensor);
         if (exito) {
             System.out.println("> Medición registrada correctamente.");
@@ -151,7 +174,8 @@ public class InterfazUsuario {
             System.out.println("4. Sensores de una estación");
             System.out.println("5. Mediciones de un sensor");
             System.out.println("6. Volver");
-            opcion = leerOpcion("Opción: ", 1, 6);
+            System.out.print("Opción: ");
+            opcion = leerOpcion(1, 6);
             switch (opcion) {
                 case 1:
                     listarRegiones();
@@ -205,8 +229,10 @@ public class InterfazUsuario {
     }
 
     private void listarEstaciones() {
-        int codigoRegion = leerEntero("Código de región: ");
-        int codigoComuna = leerEntero("Código de comuna: ");
+        System.out.print("Código de región: ");
+        int codigoRegion = Integer.parseInt(sc.nextLine().trim());
+        System.out.print("Código de comuna: ");
+        int codigoComuna = Integer.parseInt(sc.nextLine().trim());
         String[][] datos = instituto.listaEstaciones(codigoRegion, codigoComuna);
         System.out.println();
         System.out.println("ESTACIONES DE LA COMUNA " + codigoComuna);
@@ -215,14 +241,15 @@ public class InterfazUsuario {
             System.out.println("No hay estaciones registradas para esa comuna.");
             return;
         }
-        System.out.printf("%-15s %-20s %-30s %-10s %-10s%n", "CÓDIGO", "NOMBRE", "UBICACIÓN", "ESTADO", "SENSORES");
+        System.out.printf("%-15s %-20s %-25s %-10s %-10s%n", "CÓDIGO", "NOMBRE", "UBICACIÓN", "ESTADO", "SENSORES");
         for (String[] fila : datos) {
-            System.out.printf("%-15s %-20s %-30s %-10s %-10s%n", fila[0], fila[1], fila[2], fila[3], fila[4]);
+            System.out.printf("%-15s %-20s %-25s %-10s %-10s%n", fila[0], fila[1], fila[2], fila[3], fila[4]);
         }
     }
 
     private void listarSensores() {
-        String codigoEstacion = leerTexto("Código de estación: ");
+        System.out.print("Código de estación: ");
+        String codigoEstacion = sc.nextLine().trim();
         String[][] datos = instituto.listaSensores(codigoEstacion);
         System.out.println();
         System.out.println("SENSORES DE " + codigoEstacion);
@@ -240,12 +267,16 @@ public class InterfazUsuario {
     }
 
     private void listarMediciones() {
-        String codigoEstacion = leerTexto("Código de estación: ");
-        String codigoSensor = leerTexto("Código de sensor: ");
-        LocalDateTime inicio = leerFechaHora("Fecha y hora inicio [dd/MM/yyyy HH:mm]: ");
-        LocalDateTime fin = leerFechaHora("Fecha y hora fin [dd/MM/yyyy HH:mm]: ");
-        String[][] datos = instituto.listaMediciones(codigoEstacion, codigoSensor, inicio, fin);
+        System.out.print("Código de estación: ");
+        String codigoEstacion = sc.nextLine().trim();
+        System.out.print("Código de sensor: ");
+        String codigoSensor = sc.nextLine().trim();
         DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        System.out.print("Fecha y hora inicio [dd/MM/yyyy HH:mm]: ");
+        LocalDateTime inicio = LocalDateTime.parse(sc.nextLine().trim(), formato);
+        System.out.print("Fecha y hora fin [dd/MM/yyyy HH:mm]: ");
+        LocalDateTime fin = LocalDateTime.parse(sc.nextLine().trim(), formato);
+        String[][] datos = instituto.listaMediciones(codigoEstacion, codigoSensor, inicio, fin);
         System.out.println();
         System.out.println("MEDICIONES DEL SENSOR " + codigoSensor);
         System.out.println("-------------------------------");
@@ -260,31 +291,11 @@ public class InterfazUsuario {
         }
     }
 
-    private String leerTexto(String mensaje) {
-        System.out.print(mensaje);
-        return sc.nextLine().trim();
-    }
-
-    private int leerEntero(String mensaje) {
-        System.out.print(mensaje);
-        return Integer.parseInt(sc.nextLine().trim());
-    }
-
-    private float leerDecimal(String mensaje) {
-        System.out.print(mensaje);
-        return Float.parseFloat(sc.nextLine().trim());
-    }
-
-    private LocalDateTime leerFechaHora(String mensaje) {
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        System.out.print(mensaje);
-        return LocalDateTime.parse(sc.nextLine().trim(), formato);
-    }
-
-    private int leerOpcion(String mensaje, int min, int max) {
-        int opcion = leerEntero(mensaje);
+    private int leerOpcion(int min, int max) {
+        int opcion = Integer.parseInt(sc.nextLine().trim());
         while (opcion < min || opcion > max) {
-            opcion = leerEntero("Opción inválida. Intente nuevamente: ");
+            System.out.print("Opción inválida. Intente nuevamente: ");
+            opcion = Integer.parseInt(sc.nextLine().trim());
         }
         return opcion;
     }

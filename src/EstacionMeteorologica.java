@@ -3,8 +3,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
 /**
- * @author Beatriz Aguilera
- * @version Avance 1
+ * Autor Beatriz Aguilera
  */
 public class EstacionMeteorologica {
 
@@ -30,11 +29,11 @@ public class EstacionMeteorologica {
         this.sensores = new ArrayList<>();
     }
 
-    String getCodigo() {
+    public String getCodigo() {
         return codigo;
     }
 
-    Estado getEstado() {
+    public Estado getEstado() {
         return estado;
     }
 
@@ -129,7 +128,7 @@ public class EstacionMeteorologica {
     public String toString() {
 
         return String.format(Locale.US,
-                "%s; %s; (%.4f; %.4f; %.0f m); %s; %d",
+                "%s; %s; (%.4f, %.4f, %.0f m); %s; %d",
                 codigo,
                 nombre,
                 latitud,

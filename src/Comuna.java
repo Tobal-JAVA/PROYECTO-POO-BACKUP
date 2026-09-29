@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 /**
- * @author Beatriz Aguilera
- * @version Avance 1
+ * Autor Beatriz Aguilera
  */
 public class Comuna {
     private int codigo;
@@ -30,7 +29,7 @@ public class Comuna {
         }
     }
 
-    public EstacionMeteorologica findEstacionById (String Codigo) {
+    public EstacionMeteorologica findEstacionById(String Codigo) {
         for (EstacionMeteorologica e : estaciones) {
             if (e.getCodigo().equals(codigo)) {
                 return e;
