@@ -1,3 +1,7 @@
+/**
+ * Autor Cristobal Quezada
+ */
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +59,7 @@ public class InstitutoMeteorologia {
         if (estacion == null) {
             return false;
         }
-        return estacion.registraMedicion(codSensor, fechaHora, valor);
+        return estacion.registraMedicion(fechaHora, valor, codSensor);
     }
 
     public String[][] listaRegiones() {

@@ -1,3 +1,6 @@
+/**
+ * Autor Noelia Andrea Montecinos Pinto
+ */
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +11,7 @@ public abstract class Sensor {
     private String modelo;
     private Estado estado;
     private List<Medicion> mediciones;
+    private EstacionMeteorologica estacion;
 
     protected Sensor(String codigo, String marca, String modelo, EstacionMeteorologica estacion ){
         this.codigo=codigo;
@@ -23,6 +27,7 @@ public abstract class Sensor {
     }
 
     public String getMarca(){
+
         return marca;
     }
 
@@ -31,10 +36,12 @@ public abstract class Sensor {
     }
 
     public Estado getEstado(){
+
         return estado;
     }
 
     public void setEstado(Estado estado){
+
         this.estado=estado;
     }
 
@@ -67,7 +74,7 @@ public abstract class Sensor {
 
         for(Medicion m: mediciones){
             LocalDateTime fechaHora = m.getFechaHora();
-            if ((fechaHora.isEqual(inicio) || fechaHora.isAfter(inicio)) && (fechaHora.isEqual(fin) || fechaHora.isBefore(fin)){
+            if ((fechaHora.isEqual(inicio) || fechaHora.isAfter(inicio)) && (fechaHora.isEqual(fin) || fechaHora.isBefore(fin))){
                 filtradas.add(m);
             }
         }

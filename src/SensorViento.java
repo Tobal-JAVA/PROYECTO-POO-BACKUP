@@ -1,3 +1,6 @@
+/**
+ * Autor Noelia Andrea Montecinos Pinto
+ */
 public class SensorViento extends Sensor{
 
     public SensorViento(String codigo, String marca, String modelo, EstacionMeteorologica estacion) {
@@ -6,6 +9,7 @@ public class SensorViento extends Sensor{
 
     @Override
     public String getUnidad() {
+
         return "km/h";
     }
 

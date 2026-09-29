@@ -2,7 +2,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
-
+/**
+ * @author Beatriz Aguilera
+ * @version Avance 1
+ */
 public class EstacionMeteorologica {
 
     private String codigo;

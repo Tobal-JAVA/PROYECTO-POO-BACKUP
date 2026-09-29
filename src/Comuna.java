@@ -1,4 +1,8 @@
 import java.util.ArrayList;
+/**
+ * @author Beatriz Aguilera
+ * @version Avance 1
+ */
 public class Comuna {
     private int codigo;
     private String nombre;

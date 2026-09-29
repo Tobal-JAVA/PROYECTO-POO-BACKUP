@@ -1,5 +1,8 @@
 import java.util.ArrayList;
-
+/**
+ * @author Beatriz Aguilera
+ * @version Avance 1
+ */
 public class Region {
     private int codigo;
     private String nombre;
@@ -25,6 +28,7 @@ public class Region {
                 return false;
             }
         }
+
         Comuna nuevaComuna = new Comuna(cod, nom, this);
         comunas.add(nuevaComuna);
         return true;

@@ -1,4 +1,8 @@
-public class TipoSensor {
+/**
+ * Autor Cristobal Quezada
+ */
+
+public enum TipoSensor {
     HUMEDAD,
     TEMPERATURA,
     PRESION,
