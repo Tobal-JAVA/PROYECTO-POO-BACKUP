@@ -4,6 +4,7 @@
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 
 public abstract class Sensor {
     private String codigo;
@@ -60,7 +61,9 @@ public abstract class Sensor {
             }
         }
         Medicion medicionNueva = new Medicion(fechaHora, valor);
-        return mediciones.add(medicionNueva);
+        mediciones.add(medicionNueva);
+        mediciones.sort(Comparator.comparing(Medicion::getFechaHora));
+        return true;
     }
     public Medicion getLastMedicion(){
         if (mediciones.isEmpty()){

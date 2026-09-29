@@ -175,7 +175,6 @@ public class InstitutoMeteorologia {
         return null;
     }
 
-    private String obtenerCodigoEstacion(EstacionMeteorologica estacion) {
-        return estacion.toString().split("; ")[0];
+    private String obtenerCodigoEstacion(EstacionMeteorologica estacion) { return estacion.getCodigo();
     }
 }
