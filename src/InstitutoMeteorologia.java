@@ -59,7 +59,7 @@ public class InstitutoMeteorologia {
         if (estacion == null) {
             return false;
         }
-        return estacion.registraMedicion(fechaHora, valor, codSensor);
+        return estacion.registraMedicion(codSensor, fechaHora, valor);
     }
 
     public String[][] listaRegiones() {
@@ -175,6 +175,7 @@ public class InstitutoMeteorologia {
         return null;
     }
 
-    private String obtenerCodigoEstacion(EstacionMeteorologica estacion) { return estacion.getCodigo();
+    private String obtenerCodigoEstacion(EstacionMeteorologica estacion) {
+        return estacion.getCodigo();
     }
 }
