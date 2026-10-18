@@ -35,6 +35,10 @@ public class Medicion {
         return fechaHora.equals(medicion.fechaHora);
     }
 
+    public int hashCode(){
+        return fechaHora.hashCode();
+    }
+
     @Override
      public String toString(){
         DateTimeFormatter formatter =DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
