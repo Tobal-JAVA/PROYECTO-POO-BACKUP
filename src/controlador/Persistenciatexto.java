@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  * Persistencia de registros de texto separados por punto y coma.
  */
-public class PersistenciaTexto {
+public class Persistenciatexto {
     public static final String SEPARADOR = ";";
     private static PersistenciaTexto instancia;
 
