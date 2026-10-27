@@ -7,6 +7,9 @@ import modelo.EstacionMeteorologica;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Region;
+import modelo.Comuna;
+import modelo.TipoSensor;
 
 public class InstitutoMeteorologia {
 

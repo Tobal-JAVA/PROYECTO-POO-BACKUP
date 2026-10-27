@@ -1,6 +1,4 @@
-package controlador; /**
- * Autor Cristobal Quezada
- */
+package controlador;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,15 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
-public class Persistenciatexto {
-
+public class PersistenciaTexto {
     public static final String SEPARADOR = ";";
-
     private static PersistenciaTexto instancia;
 
-    private PersistenciaTexto() {
-    }
+    private PersistenciaTexto() {}
 
     public static PersistenciaTexto getInstance() {
         if (instancia == null) {
@@ -27,7 +21,6 @@ public class Persistenciatexto {
         }
         return instancia;
     }
-
 
     public static List<String[]> leeRegistros(String nombreArchivo) throws MeteorologiaException {
         Path ruta = rutaArchivo(nombreArchivo);
@@ -52,7 +45,6 @@ public class Persistenciatexto {
         }
         return registros;
     }
-
 
     public static void escribeRegistros(String nombreArchivo, List<String> lineas) throws MeteorologiaException {
         Path ruta = rutaArchivo(nombreArchivo);

@@ -1,7 +1,10 @@
 /**
  * Autor Cristobal Quezada
  */
+package vista;
 
+import controlador.InstitutoMeteorologia;
+import modelo.TipoSensor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
