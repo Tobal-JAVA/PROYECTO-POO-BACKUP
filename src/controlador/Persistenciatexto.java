@@ -1,4 +1,6 @@
-package controlador;
+package controlador; /**
+ * Autor Cristobal Quezada
+ */
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

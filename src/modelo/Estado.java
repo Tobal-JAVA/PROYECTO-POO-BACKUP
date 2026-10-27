@@ -1,5 +1,3 @@
-package modelo;
-
 /**
  * Autor Cristobal Quezada
  */

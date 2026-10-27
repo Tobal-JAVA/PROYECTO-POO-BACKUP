@@ -1,8 +1,9 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.Optional;
 /**
- * Autor Beatriz Aguilera
+ * Autor Beatriz Aguilera/Modificado Noelia Montecinos
  */
 public class Comuna {
     private int codigo;
@@ -31,13 +32,13 @@ public class Comuna {
         }
     }
 
-    public EstacionMeteorologica findEstacionById(String codigo) {
+    public Optional<EstacionMeteorologica> findEstacionById(String codigo) {
         for (EstacionMeteorologica e : estaciones) {
             if (e.getCodigo().equals(codigo)) {
-                return e;
+                return Optional.of(e);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public int getCantidadEstaciones() {

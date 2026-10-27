@@ -1,12 +1,18 @@
 package modelo;
 
+import java.util.Optional;
+
 /**
  * Autor Noelia Andrea Montecinos Pinto
  */
-public class SensorPrecipitacion extends Sensor {
+public class SensorPrecipitacion extends Sensor implements Alertable {
 
     public SensorPrecipitacion(String codigo, String marca, String modelo, EstacionMeteorologica estacion) {
         super(codigo, marca, modelo, estacion);
+    }
+
+    public TipoSensor getTipo(){
+        return TipoSensor.PRECIPITACION;
     }
 
     @Override
@@ -17,6 +23,22 @@ public class SensorPrecipitacion extends Sensor {
     @Override
     public boolean esValorAdmisible(float valor) {
         return valor >= 0.0f && valor <= 500.0f;
+    }
+
+    @Override
+    public Optional<NivelAlerta> evaluaAlerta(float valor) {
+        if (valor >= 60.0f) return Optional.of(NivelAlerta.ALARMA);
+        if (valor >= 40.0f) return Optional.of(NivelAlerta.ALERTA);
+        if (valor >= 20.0f) return Optional.of(NivelAlerta.AVISO);
+        return Optional.empty();
+    }
+
+    @Override
+    public String getFenomeno(float valor) {
+        if (valor >= 20.0f) {
+            return "Precipitación intensa";
+        }
+        return "";
     }
 }
 

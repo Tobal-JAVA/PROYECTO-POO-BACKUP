@@ -2,6 +2,8 @@ package controlador; /**
  * Autor Cristobal Quezada
  */
 
+import modelo.EstacionMeteorologica;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,11 +1,14 @@
 package modelo;
 
+import controlador.MeteorologiaException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Optional;
 /**
- * Autor Beatriz Aguilera
+ * Autor Beatriz Aguilera / Modificado Noelia Montecinos
  */
 public class EstacionMeteorologica {
 
@@ -17,6 +20,7 @@ public class EstacionMeteorologica {
     private Estado estado;
     private Comuna comuna;
     private ArrayList<Sensor> sensores;
+    private ArrayList<AlertaMeteorologica> alertas;
 
     public EstacionMeteorologica(String codigo, String nombre,
                                  float longitud, float latitud, float altitud, Comuna comuna) {
@@ -29,6 +33,7 @@ public class EstacionMeteorologica {
         this.estado = Estado.ACTIVO;
         this.comuna = comuna;
         this.sensores = new ArrayList<>();
+        this.alertas = new ArrayList<>();
     }
 
     public String getCodigo() {
@@ -39,76 +44,124 @@ public class EstacionMeteorologica {
         return estado;
     }
 
-    public boolean instalaSensor(String codigo, String marca,
-                                 String modelo, TipoSensor tipo) {
+    public void instalaSensor(String codigo, String marca,
+                              String modelo, TipoSensor tipo) throws MeteorologiaException {
 
         if (this.estado != Estado.ACTIVO) {
-            return false;
+            throw new MeteorologiaException("La estación " + this.codigo + " no está activa.");
         }
 
         for (Sensor s : sensores) {
-
             if (s.getCodigo().equals(codigo)) {
-                return false;
+                throw new MeteorologiaException("Ya existe un sensor con el código " + codigo + " en la estación " + this.codigo + ".");
             }
 
-            if (s.getEstado() == Estado.ACTIVO
-                    && sensorCoincideConTipo(s, tipo)) {
-                return false;
+            if (s.getEstado() == Estado.ACTIVO && sensorCoincideConTipo(s, tipo)) {
+                throw new MeteorologiaException("La estación " + this.codigo + " ya tiene un sensor ACTIVO de tipo " + tipo + " (" + s.getCodigo() + ").");
             }
         }
+
 
         Sensor nuevoSensor;
 
         switch (tipo) {
 
-            case TipoSensor.TEMPERATURA:
+            case TEMPERATURA:
                 nuevoSensor = new SensorTemperatura(
                         codigo, marca, modelo, this);
                 break;
 
-            case TipoSensor.HUMEDAD:
+            case HUMEDAD:
                 nuevoSensor = new SensorHumedad(
                         codigo, marca, modelo, this);
                 break;
 
-            case TipoSensor.PRESION:
+            case PRESION:
                 nuevoSensor = new SensorPresion(
                         codigo, marca, modelo, this);
                 break;
 
-            case TipoSensor.VIENTO:
+            case VIENTO:
                 nuevoSensor = new SensorViento(
                         codigo, marca, modelo, this);
                 break;
 
-            case TipoSensor.PRECIPITACION:
+            case PRECIPITACION:
                 nuevoSensor = new SensorPrecipitacion(
                         codigo, marca, modelo, this);
                 break;
 
             default:
-                return false;
+                throw new MeteorologiaException("Tipo de sensor no válido.");
         }
 
         sensores.add(nuevoSensor);
-        return true;
+
     }
 
-    public boolean registraMedicion(LocalDateTime fechaHora,
-                                    float valor, String codigoSensor) {
+    public void cambiaEstadoSensor(String codigoSensor, Estado nuevoEstado) throws MeteorologiaException {
+        Optional<Sensor> sensorOpt = findSensorByCodigo(codigoSensor);
+
+        if (!sensorOpt.isPresent()) {
+            throw new MeteorologiaException("No existe el sensor " + codigoSensor + " en la estación " + this.codigo + ".");
+        }
+
+        Sensor s = sensorOpt.get();
+
+        if (s.getEstado() == nuevoEstado) {
+            throw new MeteorologiaException("El sensor " + codigoSensor + " ya se encuentra en estado " + nuevoEstado + ".");
+        }
+
+
+        if (nuevoEstado == Estado.ACTIVO) {
+            for (Sensor existente : sensores) {
+                if (existente.getEstado() == Estado.ACTIVO && existente.getTipo() == s.getTipo() && !existente.getCodigo().equals(codigoSensor)) {
+                    throw new MeteorologiaException("No es posible activar el sensor " + codigoSensor + ": la estación ya tiene activo el sensor " + existente.getCodigo() + " de tipo " + s.getTipo() + ".");
+                }
+            }
+        }
+
+
+        s.setEstado(nuevoEstado);
+    }
+
+    public void registraMedicion(LocalDateTime fechaHora,
+                                 float valor, String codigoSensor) throws MeteorologiaException {
 
         if (this.estado != Estado.ACTIVO) {
-            return false;
+            throw new MeteorologiaException("La estación " + this.codigo + " no está activa.");
         }
 
-        Sensor s = findSensorByCodigo(codigoSensor);
+        Optional<Sensor> sensorOpt = findSensorByCodigo(codigoSensor);
 
-        if (s == null) {
-            return false;
+        if (!sensorOpt.isPresent()) {
+            throw new MeteorologiaException("No existe el sensor " + codigoSensor + " en la estación " + this.codigo + ".");
         }
 
-        return s.addMedicion(fechaHora, valor);
+        Sensor s = sensorOpt.get();
+
+        s.addMedicion(fechaHora, valor);
+
+        if (s instanceof Alertable) {
+            Alertable alertableSensor = (Alertable) s;
+            Optional<NivelAlerta> nivelOpt = alertableSensor.evaluaAlerta(valor);
+            if (nivelOpt.isPresent()) {
+                String fenomeno = alertableSensor.getFenomeno(valor);
+                AlertaMeteorologica alerta = new AlertaMeteorologica(fechaHora, valor, nivelOpt.get(), fenomeno, s);
+                this.alertas.add(alerta);
+            }
+        }
+    }
+    public AlertaMeteorologica[] getAlertasBetween(LocalDateTime inicio, LocalDateTime fin) {
+        ArrayList<AlertaMeteorologica> filtradas = new ArrayList<>();
+        for (AlertaMeteorologica a : alertas) {
+            LocalDateTime fechaAlerta = a.getFechaHora();
+
+            if (!fechaAlerta.isBefore(inicio) && !fechaAlerta.isAfter(fin)) {
+                filtradas.add(a);
+            }
+        }
+        return filtradas.toArray(new AlertaMeteorologica[0]);
     }
 
     private int getCantidadSensoresOperativos() {
@@ -162,7 +215,8 @@ public class EstacionMeteorologica {
             matriz[i][4] = s.getUnidad();
             matriz[i][5] = s.getEstado().toString();
 
-            Medicion ultima = s.getLastMedicion();
+            Medicion[] meds = s.getMediciones();
+            Medicion ultima = (meds != null && meds.length > 0) ? meds[meds.length - 1] : null;
 
             if (ultima != null) {
 
@@ -186,11 +240,13 @@ public class EstacionMeteorologica {
             LocalDateTime inicio,
             LocalDateTime fin) {
 
-        Sensor s = findSensorByCodigo(codigoSensor);
+        Optional<Sensor> sensorOpt = findSensorByCodigo(codigoSensor);
 
-        if (s == null) {
+        if (!sensorOpt.isPresent()) {
             return new String[0][0];
         }
+
+        Sensor s = sensorOpt.get();
 
         Medicion[] mediciones =
                 s.getMedicionesBetween(inicio, fin);
@@ -227,16 +283,13 @@ public class EstacionMeteorologica {
         return matriz;
     }
 
-    private Sensor findSensorByCodigo(String codigo) {
-
+    private Optional<Sensor> findSensorByCodigo(String codigo) {
         for (Sensor s : sensores) {
-
             if (s.getCodigo().equals(codigo)) {
-                return s;
+                return Optional.of(s);
             }
         }
-
-        return null;
+        return Optional.empty();
     }
 
     private boolean sensorCoincideConTipo(
@@ -244,19 +297,19 @@ public class EstacionMeteorologica {
 
         switch (tipo) {
 
-            case TipoSensor.TEMPERATURA:
+            case TEMPERATURA:
                 return s instanceof SensorTemperatura;
 
-            case TipoSensor.HUMEDAD:
+            case HUMEDAD:
                 return s instanceof SensorHumedad;
 
-            case TipoSensor.PRESION:
+            case PRESION:
                 return s instanceof SensorPresion;
 
-            case TipoSensor.VIENTO:
+            case VIENTO:
                 return s instanceof SensorViento;
 
-            case TipoSensor.PRECIPITACION:
+            case PRECIPITACION:
                 return s instanceof SensorPrecipitacion;
 
             default:

@@ -2,10 +2,14 @@ package modelo; /**
  * Autor Noelia Andrea Montecinos Pinto
  */
 
+import controlador.MeteorologiaException;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
+import java.util.Optional;
 
 public abstract class Sensor {
     private String codigo;
@@ -47,30 +51,30 @@ public abstract class Sensor {
         this.estado=estado;
     }
 
-    public boolean addMedicion(LocalDateTime fechaHora, float valor){
+    public void addMedicion(LocalDateTime fechaHora, float valor) throws MeteorologiaException{
         if(this.estado != Estado.ACTIVO){
-            return false;
+            throw new MeteorologiaException("El sensor " + this.codigo + " no está activo.");
         }
 
         if(!esValorAdmisible(valor)){
-            return false;
+            throw new MeteorologiaException("El valor " + String.format(java.util.Locale.US, "%.1f", valor) + " " + getUnidad() + " no es admisible para un sensor de tipo " + getTipo() + ".");
         }
 
         for(Medicion m : mediciones){
             if(m.getFechaHora().equals(fechaHora)){
-                return false;
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                throw new MeteorologiaException("El sensor " + this.codigo + " ya registra una medición el " + fechaHora.format(dateFormatter) + " a las " + fechaHora.format(timeFormatter) + ".");
             }
         }
         Medicion medicionNueva = new Medicion(fechaHora, valor);
         mediciones.add(medicionNueva);
         mediciones.sort(Comparator.comparing(Medicion::getFechaHora));
-        return true;
+
     }
-    public Medicion getLastMedicion(){
-        if (mediciones.isEmpty()){
-            return null;
-        }
-        return mediciones.get(mediciones.size()-1);
+
+    public Medicion[] getMediciones(){
+        return mediciones.toArray(new  Medicion[0]);
     }
 
     public Medicion [] getMedicionesBetween(LocalDateTime inicio, LocalDateTime fin ){
@@ -85,6 +89,15 @@ public abstract class Sensor {
         return filtradas.toArray(new Medicion[0]);
     }
 
+    public Optional<ResumenMediciones> getResumenBetween(LocalDateTime inicio, LocalDateTime fin) {
+        Medicion[] medEnRango = getMedicionesBetween(inicio, fin);
+        if (medEnRango.length == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new ResumenMediciones(medEnRango));
+    }
+
+    public abstract TipoSensor getTipo();
     public abstract String getUnidad();
     public abstract boolean esValorAdmisible(float valor);
 

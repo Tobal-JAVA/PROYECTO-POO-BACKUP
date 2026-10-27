@@ -8,6 +8,9 @@ public class SensorHumedad extends Sensor {
     public SensorHumedad(String codigo, String marca, String modelo, EstacionMeteorologica estacion) {
         super(codigo, marca, modelo, estacion);
     }
+    public TipoSensor getTipo(){
+        return TipoSensor.HUMEDAD;
+    }
 
     @Override
     public String getUnidad() {

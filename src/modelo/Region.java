@@ -1,9 +1,9 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.Optional;
 /**
- * @author Beatriz Aguilera
- * @version Avance 1
+ * @author Beatriz Aguilera / Modificado Noelia Montecinos
  */
 public class Region {
     private int codigo;
@@ -35,13 +35,14 @@ public class Region {
         comunas.add(nuevaComuna);
         return true;
     }
-    public Comuna findComunaById(int codigo) {
+
+    public Optional<Comuna> findComunaById(int codigo) {
         for (Comuna c : comunas) {
             if (c.getCodigo() == codigo) {
-                return c;
+                return Optional.of(c);
             }
         }
-        return null;
+        return Optional.empty();
     }
     public Comuna[] getComunas() {
         return comunas.toArray(new Comuna[0]);

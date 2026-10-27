@@ -9,6 +9,11 @@ public class SensorPresion extends Sensor {
     }
 
     @Override
+    public TipoSensor getTipo() {
+        return TipoSensor.PRESION;
+    }
+
+    @Override
     public String getUnidad() {
 
         return "hPa";
