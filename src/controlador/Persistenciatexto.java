@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 
-public class PersistenciaTexto {
+public class Persistenciatexto {
 
     public static final String SEPARADOR = ";";
 
