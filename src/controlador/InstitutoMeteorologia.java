@@ -1,9 +1,9 @@
-package controlador; /**
+package controlador;
+/**
  * Autor Cristobal Quezada
  */
 
 import modelo.EstacionMeteorologica;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,14 @@ public class InstitutoMeteorologia {
         if (estacion == null) {
             return false;
         }
-        return estacion.instalaSensor(cod, marca, modelo, tipo);
+
+        try {
+            // EstacionMeteorologica.instalaSensor lanza una excepción si falla.
+            estacion.instalaSensor(cod, marca, modelo, tipo);
+            return true;
+        } catch (MeteorologiaException e) {
+            return false;
+        }
     }
 
     public boolean registraMedicion(LocalDateTime fechaHora, float valor, String codEstacion, String codSensor) {
@@ -64,7 +71,14 @@ public class InstitutoMeteorologia {
         if (estacion == null) {
             return false;
         }
-        return estacion.registraMedicion(fechaHora, valor, codSensor);
+
+        try {
+            // La estación registra la medición o informa el error mediante excepción.
+            estacion.registraMedicion(fechaHora, valor, codSensor);
+            return true;
+        } catch (MeteorologiaException e) {
+            return false;
+        }
     }
 
     public String[][] listaRegiones() {
