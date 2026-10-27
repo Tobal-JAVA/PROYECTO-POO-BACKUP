@@ -37,7 +37,7 @@ public class InstitutoMeteorologia {
         if (region == null) {
             return false;
         }
-        Comuna comuna = region.findComunaById(codComuna);
+        Comuna comuna = region.findComunaById(codComuna).orElse(null);
         if (comuna == null) {
             return false;
         }
@@ -124,7 +124,7 @@ public class InstitutoMeteorologia {
         if (region == null) {
             return new String[0][0];
         }
-        Comuna comuna = region.findComunaById(codigoComuna);
+        Comuna comuna = region.findComunaById(codigoComuna).orElse(null);
         if (comuna == null) {
             return new String[0][0];
         }
